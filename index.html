@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Submission</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Submit Answers</h2>
+        <form id="questionForm">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div id="questionsContainer">
+                <!-- Questions will be dynamically loaded here -->
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="response"></div>
+    </div>
+
+    <!-- Include html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+    // Load questions from API and generate form elements
+    function loadQuestions() {
+        fetch('https://asia-southeast2-testlogin-366704.cloudfunctions.net/getall_questionn')
+            .then(response => response.json())
+            .then(responseData => {
+                console.log(responseData); // Inspect the response data structure
+
+                if (responseData.status && Array.isArray(responseData.data)) {
+                    const questionsContainer = document.getElementById('questionsContainer');
+                    questionsContainer.innerHTML = ''; // Clear existing content
+
+                    responseData.data.forEach((question, index) => {
+                        const questionDiv = document.createElement('div');
+                        questionDiv.classList.add('form-group');
+                        questionDiv.innerHTML = `
+                            <label for="question${index}">${question.question}</label>
+                            <input type="hidden" name="id${index}" value="${question.id}">
+                            <input type="hidden" name="correct_answer${index}" value="${question.correct_answer}"> <!-- Added correct_answer hidden input -->
+                            <select id="question${index}" name="answers${index}" required>
+                                ${question.answers.map(option => `<option value="${option}">${option}</option>`).join('')}
+                            </select>
+                        `;
+                        questionsContainer.appendChild(questionDiv);
+                    });
+                } else {
+                    console.error('Expected an array under the "data" key but got:', responseData);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading questions:', error);
+            });
+    }
+
+    document.getElementById('questionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+
+        // Prepare data for submission
+        const formElements = document.querySelectorAll('#questionForm select');
+        const data = Array.from(formElements).map((select, index) => {
+            // Fetching question text from the previous sibling (label)
+            const questionLabel = select.previousElementSibling.textContent.trim();
+            
+            return {
+                id: parseInt(document.querySelector(`input[name="id${index}"]`).value, 10), // Convert id to integer
+                question: questionLabel,
+                username: username,
+                answers: [select.value],
+                correct_answer: document.querySelector(`input[name="correct_answer${index}"]`).value, // Fetch correct answer
+                status: true // Placeholder; set to true or false based on actual validation
+            };
+        });
+
+        fetch('https://asia-southeast2-testlogin-366704.cloudfunctions.net/cek_answer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(responseData => {
+            console.log('API Response:', responseData); // Log the entire response for inspection
+
+            if (responseData.status) {
+                const correctCount = responseData.correct_count;
+                const incorrectCount = responseData.incorrect_count;
+                const username = responseData.user_details.username;
+                const certificateText = responseData.certificate;
+
+                const responseDiv = document.getElementById('response');
+                responseDiv.innerHTML = `
+                    <div id="certificate" class="certificate">
+                        <h3>Congratulations, ${username}!</h3>
+                        <p>${certificateText}</p>
+                        <p>Correct Answers: ${correctCount}</p>
+                        <p>Incorrect Answers: ${incorrectCount}</p>
+                        <button id="downloadCertificate">Download Certificate</button>
+                    </div>
+                `;
+
+                // Add event listener for download button
+                document.getElementById('downloadCertificate').addEventListener('click', function() {
+                    html2canvas(document.getElementById('certificate')).then(canvas => {
+                        const link = document.createElement('a');
+                        link.href = canvas.toDataURL('image/png');
+                        link.download = 'certificate.png';
+                        link.click();
+                    }).catch(error => {
+                        console.error('Error generating image:', error);
+                    });
+                });
+            } else {
+                console.error('Unexpected response format:', responseData);
+                document.getElementById('response').innerHTML = `<p>Error: ${responseData.message || 'Unknown error'}</p>`;
+            }
+        })
+        .catch(error => {
+            console.error('Fetch Error:', error);
+            document.getElementById('response').innerHTML = `<p>Error: ${error.message || 'Unknown error'}</p>`;
+        });
+    });
+
+    // Load questions when the page is loaded
+    window.onload = loadQuestions;
+    </script>
+</body>
+</html>

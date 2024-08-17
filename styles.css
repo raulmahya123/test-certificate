@@ -1,0 +1,113 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 50%;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+select,
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#response {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    text-align: center;
+}
+
+/* Certificate Styles */
+.certificate {
+    background: linear-gradient(135deg, #ffebee, #fce4ec);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
+    font-size: 20px;
+    color: #c62828;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    background-image: url('oke.png'); /* Replace with your batik image URL */
+    background-size: cover;
+    background-position: center;
+}
+
+.certificate::before {
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: auto;
+}
+
+.certificate h3 {
+    margin-top: 70px;
+    font-size: 28px;
+    color: #c62828;
+}
+
+.certificate p {
+    margin: 15px 0;
+    font-size: 18px;
+}
+
+#downloadCertificate {
+    background-color: #c62828;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.3s ease;
+}
+
+#downloadCertificate:hover {
+    background-color: #b71c1c;
+}
